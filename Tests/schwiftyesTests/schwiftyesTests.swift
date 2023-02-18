@@ -52,11 +52,22 @@ final class schwiftyesTests: XCTestCase {
         XCTAssertNil(position3 as? Position)
     }
 
-    func testSystem() throws {
+    func testComponentManager() throws {
         let entityManager = schwiftyes.EntityManager<Sigs>()
-        let componentArray = schwiftyes.ComponentArray()
-        let systemManager = schwiftyes.SystemManager<Sigs>()
+        let componentManager = schwiftyes.ComponentManager<Sigs>()
+
+        componentManager.registerComponent(Position.self)
 
         let entity = entityManager.createEntity()
+        let position = Position(x: 0, y: 0)
+        componentManager.addComponent(position, entity)
+
+        let position2 = componentManager.getComponent(entity, Position.self)
+        XCTAssertNotNil(position2)
+        XCTAssertEqual(position2!.x, 0)
+
+        componentManager.entityDestroyed(entity)
+        let position3 = componentManager.getComponent(entity, Position.self)
+        XCTAssertNil(position3)
     }
 }
