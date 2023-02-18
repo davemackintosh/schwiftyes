@@ -18,7 +18,7 @@ struct PhysicsSystem: schwiftyes.System {
 
     var signature: Sigs = [.sig1, .sig2]
 
-    func update() throws {
+    func update() {
         print("PhysicsSystem")
     }
 }
@@ -33,7 +33,6 @@ final class schwiftyesTests: XCTestCase {
         XCTAssertEqual(entity2, 1)
         XCTAssertEqual(entity3, 2)
         entityManager.destroyEntity(entity2)
-        print(entity2)
         XCTAssertEqual(entity3, 2)
     }
 
@@ -47,5 +46,17 @@ final class schwiftyesTests: XCTestCase {
 
         let position2 = componentArray.getData(entity) as! Position
         XCTAssertEqual(position2.x, 0)
+
+        componentArray.entityDestroyed(entity)
+        let position3 = componentArray.getData(entity)
+        XCTAssertNil(position3 as? Position)
+    }
+
+    func testSystem() throws {
+        let entityManager = schwiftyes.EntityManager<Sigs>()
+        let componentArray = schwiftyes.ComponentArray()
+        let systemManager = schwiftyes.SystemManager<Sigs>()
+
+        let entity = entityManager.createEntity()
     }
 }

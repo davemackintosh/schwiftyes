@@ -18,6 +18,8 @@ public protocol System {
     func update()
 }
 
+private class NoComponent: Component {}
+
 public class EntityManager<Signatures: OptionSet> {
     private var entities: ContiguousArray<Entity> = .init(unsafeUninitializedCapacity: MAX_ENTITIES) { buffer, count in
         for i in 0 ..< MAX_ENTITIES {
@@ -58,27 +60,48 @@ public class EntityManager<Signatures: OptionSet> {
 }
 
 public class ComponentArray {
-    private var componentArray: ContiguousArray<Component> = []
-    private var entityToIndexMap: ContiguousArray<Entity> = []
-    private var indexToEntityMap: ContiguousArray<Entity> = []
+    private var componentArray: ContiguousArray<Component> = .init(repeating: NoComponent(), count: MAX_ENTITIES)
+
+    private var entityToIndexMap: ContiguousArray<Entity> = .init(unsafeUninitializedCapacity: MAX_ENTITIES) { buffer, count in
+        for i in 0 ..< MAX_ENTITIES {
+            buffer[i] = i
+        }
+        count = MAX_ENTITIES
+    }
+
+    private var indexToEntityMap: ContiguousArray<Entity> = .init(unsafeUninitializedCapacity: MAX_ENTITIES) { buffer, count in
+        for i in 0 ..< MAX_ENTITIES {
+            buffer[i] = i
+        }
+        count = MAX_ENTITIES
+    }
+
     private var size = 0
 
     func insertData(_ component: Component, _ entity: Entity) {
         let newIndex = size
+
+        componentArray[newIndex] = component
+        entityToIndexMap[entity] = newIndex
+        indexToEntityMap[newIndex] = entity
+
         size += 1
-        componentArray.append(component)
-        entityToIndexMap.append(newIndex)
-        indexToEntityMap.append(entity)
     }
 
     func removeData(_ entity: Entity) {
+        // Copy element at end into deleted element's place to maintain density
         let indexOfRemovedEntity = entityToIndexMap[entity]
         let indexOfLastElement = size - 1
-        componentArray[indexOfRemovedEntity] = componentArray[indexOfLastElement]
+
+        // Update map to point to moved spot
         let entityOfLastElement = indexToEntityMap[indexOfLastElement]
         entityToIndexMap[entityOfLastElement] = indexOfRemovedEntity
         indexToEntityMap[indexOfRemovedEntity] = entityOfLastElement
-        size -= 1
+
+        // Remove the last element
+        componentArray[indexOfRemovedEntity] = NoComponent()
+        entityToIndexMap[entity] = 0
+        indexToEntityMap[indexOfLastElement] = 0
     }
 
     func getData(_ entity: Entity) -> Component {
@@ -87,19 +110,17 @@ public class ComponentArray {
     }
 
     func entityDestroyed(_ entity: Entity) {
-        if entityToIndexMap[entity] < size {
-            removeData(entity)
-        }
+        removeData(entity)
     }
 }
 
-public class SystemManager {
-    private var signatures: ContiguousArray<any OptionSet> = []
+public class SystemManager<Signatures: OptionSet> {
+    private var signatures: ContiguousArray<Signatures> = []
     private var systems: ContiguousArray<any System> = []
 
     func registerSystem(_ system: some System) {
         let signature = system.signature
-        signatures.append(signature)
+        signatures.append(signature as! Signatures)
         systems.append(type(of: system).init())
     }
 }
