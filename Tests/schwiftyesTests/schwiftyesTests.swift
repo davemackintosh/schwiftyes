@@ -14,9 +14,11 @@ struct Position: Component {
 }
 
 struct PhysicsSystem: schwiftyes.System {
-    typealias SystemSignature = Sigs
+	static var signature: Sigs = [.sig1, .sig2]
 
-    var signature: Sigs = [.sig1, .sig2]
+	var entities: [schwiftyes.Entity] = []
+
+    typealias SystemSignature = Sigs
 
     func update() {
         print("PhysicsSystem")
@@ -69,5 +71,19 @@ final class schwiftyesTests: XCTestCase {
         componentManager.entityDestroyed(entity)
         let position3 = componentManager.getComponent(entity, Position.self)
         XCTAssertNil(position3)
+    }
+
+    func testSystemManager() throws {
+        let entityManager = schwiftyes.EntityManager<Sigs>()
+        let componentManager = schwiftyes.ComponentManager<Sigs>()
+        let systemManager = schwiftyes.SystemManager<Sigs>(componentManager)
+
+        componentManager.registerComponent(Position.self)
+
+        let entity = entityManager.createEntity()
+        let position = Position(x: 0, y: 0)
+        componentManager.addComponent(position, entity)
+
+        systemManager.registerSystem(PhysicsSystem.self)
     }
 }
