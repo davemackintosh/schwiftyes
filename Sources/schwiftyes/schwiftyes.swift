@@ -9,9 +9,10 @@
 #endif
 
 public typealias Entity = Int
-public protocol Component {}
+public class Component {}
+
 public class System<Signatures: OptionSet> {
-    var signature: Signatures { fatalError("Must override") }
+    var signature: Signatures { fatalError("Must override a system's signatures otherwise it wint run on any entities.") }
     var entities: [Entity] = []
     var componentManager: ComponentManager<Signatures>
 
@@ -19,7 +20,9 @@ public class System<Signatures: OptionSet> {
         self.componentManager = componentManager
     }
 
-    func update() {}
+    func update() {
+        fatalError("Must override a system's update method otherwise it's just an expensive loop in each frame.")
+    }
 }
 
 private class NoComponent: Component {}
@@ -108,9 +111,12 @@ public class ComponentArray {
         indexToEntityMap[indexOfLastElement] = 0
     }
 
+    // getData returns a reference so that a component can be modified directly
+    // by the system responsible for it.
     func getData(_ entity: Entity) -> Component {
-        let index = entityToIndexMap[entity]
-        return componentArray[index]
+        // let index = entityToIndexMap[entity]
+        // return componentArray[index]
+        componentArray[entityToIndexMap[entity]]
     }
 
     func entityDestroyed(_ entity: Entity) {
@@ -154,11 +160,14 @@ public class ComponentManager<Signatures: OptionSet> {
         componentArray.removeData(entity)
     }
 
+    // getComponent returns a mutable reference so that a component can be modified directly
+    // by the system responsible for it.
     func getComponent<T: Component>(_ entity: Entity, _: T.Type) -> T? {
-        guard let componentArray = getComponentArray(T.self) else {
-            fatalError("Component not registered.")
-        }
-        return componentArray.getData(entity) as? T
+        // guard let componentArray = getComponentArray(T.self) else {
+        //    fatalError("Component not registered.")
+        // }
+        // return componentArray.getData(entity) as? T
+        getComponentArray(T.self)?.getData(entity) as? T
     }
 
     func entityDestroyed(_ entity: Entity) {
@@ -175,6 +184,12 @@ public class SystemManager<Signatures: OptionSet> {
 
     init(_ componentManager: ComponentManager<Signatures>) {
         self.componentManager = componentManager
+    }
+
+    func update() {
+        for system in systems.values {
+            system.update()
+        }
     }
 
     func registerSystem(_ system: System<Signatures>.Type) {

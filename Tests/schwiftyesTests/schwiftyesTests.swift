@@ -8,9 +8,14 @@ struct Sigs: OptionSet {
     static let sig2 = Sigs(rawValue: 1 << 1)
 }
 
-struct Position: Component {
+class Position: Component {
     var x: Float
     var y: Float
+
+    init(x: Float, y: Float) {
+        self.x = x
+        self.y = y
+    }
 }
 
 class PhysicsSystem: schwiftyes.System<Sigs> {
@@ -19,7 +24,10 @@ class PhysicsSystem: schwiftyes.System<Sigs> {
     }
 
     override func update() {
-        print("PhysicsSystem")
+        for entity in entities {
+            let position = componentManager.getComponent(entity, Position.self)
+            position?.x += 1
+        }
     }
 }
 
@@ -83,5 +91,17 @@ final class schwiftyesTests: XCTestCase {
         componentManager.addComponent(position, entity)
 
         systemManager.registerSystem(PhysicsSystem.self)
+
+        systemManager.update()
+
+        let position2 = componentManager.getComponent(entity, Position.self)
+        XCTAssertNotNil(position2)
+        XCTAssertEqual(position2!.x, 1)
+
+        systemManager.update()
+
+        let position3 = componentManager.getComponent(entity, Position.self)
+        XCTAssertNotNil(position3)
+        XCTAssertEqual(position3!.x, 2)
     }
 }
