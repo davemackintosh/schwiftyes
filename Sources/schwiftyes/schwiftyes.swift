@@ -10,14 +10,16 @@
 
 public typealias Entity = Int
 public protocol Component {}
-public protocol System {
-    associatedtype SystemSignature: OptionSet
-    static var signature: SystemSignature { get }
-    var entities: [Entity] { get set }
-	var componentManager: ComponentManager<SystemSignature> { get set }
+public class System<Signatures: OptionSet> {
+    var signature: Signatures { fatalError("Must override") }
+    var entities: [Entity] = []
+    var componentManager: ComponentManager<Signatures>
 
-	init()
-	func update()
+    required init(_ componentManager: ComponentManager<Signatures>) {
+        self.componentManager = componentManager
+    }
+
+    func update() {}
 }
 
 private class NoComponent: Component {}
@@ -167,7 +169,7 @@ public class ComponentManager<Signatures: OptionSet> {
 }
 
 public class SystemManager<Signatures: OptionSet> {
-    private var systems: [Int: any System] = [:]
+    private var systems: [Int: System<Signatures>] = [:]
     private var signatures: [Int: Signatures] = [:]
     private var componentManager: ComponentManager<Signatures>
 
@@ -175,11 +177,10 @@ public class SystemManager<Signatures: OptionSet> {
         self.componentManager = componentManager
     }
 
-    func registerSystem(_ system: (some System).Type) {
+    func registerSystem(_ system: System<Signatures>.Type) {
         let typeID = ObjectIdentifier(system).hashValue
-        systems[typeID] = system.init()
-		systems[typeID]?.componentManager = self.componentManager
-		signatures[typeID] = (system.signature as! Signatures)
+        systems[typeID] = system.init(componentManager)
+        signatures[typeID] = systems[typeID]?.signature
     }
 
     func entitySignatureChanged(_ entity: Entity, _ entitySignature: Signatures) {

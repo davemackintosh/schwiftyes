@@ -13,14 +13,12 @@ struct Position: Component {
     var y: Float
 }
 
-struct PhysicsSystem: schwiftyes.System {
-	static var signature: Sigs = [.sig1, .sig2]
+class PhysicsSystem: schwiftyes.System<Sigs> {
+    override var signature: Sigs {
+        [.sig1, .sig2]
+    }
 
-	var entities: [schwiftyes.Entity] = []
-
-    typealias SystemSignature = Sigs
-
-    func update() {
+    override func update() {
         print("PhysicsSystem")
     }
 }
