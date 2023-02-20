@@ -1,5 +1,5 @@
 public class System<Signatures: OptionSet> {
-    var signature: Signatures { fatalError("Must override a system's signatures otherwise it wint run on any entities.") }
+    var signature: Signatures { fatalError("Must override a system's signatures otherwise it won't run on any entities.") }
     var entities: [Entity] = []
     var componentManager: ComponentManager<Signatures>
 

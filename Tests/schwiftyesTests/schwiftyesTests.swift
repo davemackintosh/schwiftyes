@@ -8,9 +8,13 @@ struct Sigs: OptionSet {
     static let sig2 = Sigs(rawValue: 1 << 1)
 }
 
-class Position: Component {
+class Position: Component<Sigs> {
     var x: Float
     var y: Float
+
+    override var signature: Sigs {
+        [.sig1, .sig2]
+    }
 
     init(x: Float, y: Float) {
         self.x = x
@@ -24,7 +28,7 @@ class PhysicsSystem: schwiftyes.System<Sigs> {
     }
 
     required init(_ componentManager: ComponentManager<Sigs>) {
-		super.init(componentManager)
+        super.init(componentManager)
     }
 
     override func update() {
@@ -50,7 +54,7 @@ final class schwiftyesTests: XCTestCase {
 
     func testComponentArray() throws {
         let entityManager = schwiftyes.EntityManager<Sigs>()
-        let componentArray = schwiftyes.ComponentArray()
+        let componentArray = schwiftyes.ComponentArray<Sigs>()
 
         let entity = entityManager.createEntity()
         var position = Position(x: 0, y: 0)
@@ -89,13 +93,13 @@ final class schwiftyesTests: XCTestCase {
         let systemManager = schwiftyes.SystemManager<Sigs>(componentManager)
 
         systemManager.registerSystem(PhysicsSystem.self)
-		componentManager.registerComponent(Position.self)
+        componentManager.registerComponent(Position.self)
 
         let entity = entityManager.createEntity()
         var position = Position(x: 0, y: 0)
         componentManager.addComponent(&position, entity)
 
-		systemManager.entitySignatureChanged(entity, .sig1)
+        systemManager.entitySignatureChanged(entity, .sig1)
         systemManager.update()
 
         let position2 = componentManager.getComponent(entity, Position.self)
