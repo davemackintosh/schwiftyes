@@ -8,7 +8,7 @@
     let MAX_COMPONENTS = 1000
 #endif
 
-final class ECS<Signatures: OptionSet> {
+class ECS<Signatures: OptionSet> {
     private var entityManager: EntityManager<Signatures>
     private var componentManager: ComponentManager<Signatures>
     private var systemManager: SystemManager<Signatures>
