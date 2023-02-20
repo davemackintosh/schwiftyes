@@ -2,6 +2,8 @@ open class Component<S: OptionSet> {
     var signature: S {
         fatalError("Component signature must be set in subclass, otherwise no system will iterate it and it won't be considered valid.")
     }
+
+    public init() {}
 }
 
 public class ComponentManager<Signatures: OptionSet> {
