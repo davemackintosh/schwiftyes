@@ -23,6 +23,10 @@ class PhysicsSystem: schwiftyes.System<Sigs> {
         [.sig1, .sig2]
     }
 
+    required init(_ componentManager: ComponentManager<Sigs>) {
+		super.init(componentManager)
+    }
+
     override func update() {
         for entity in entities {
             let position = componentManager.getComponent(entity, Position.self)
@@ -49,8 +53,8 @@ final class schwiftyesTests: XCTestCase {
         let componentArray = schwiftyes.ComponentArray()
 
         let entity = entityManager.createEntity()
-        let position = Position(x: 0, y: 0)
-        componentArray.insertData(position, entity)
+        var position = Position(x: 0, y: 0)
+        componentArray.insertData(&position, entity)
 
         let position2 = componentArray.getData(entity) as! Position
         XCTAssertEqual(position2.x, 0)
@@ -67,8 +71,8 @@ final class schwiftyesTests: XCTestCase {
         componentManager.registerComponent(Position.self)
 
         let entity = entityManager.createEntity()
-        let position = Position(x: 0, y: 0)
-        componentManager.addComponent(position, entity)
+        var position = Position(x: 0, y: 0)
+        componentManager.addComponent(&position, entity)
 
         let position2 = componentManager.getComponent(entity, Position.self)
         XCTAssertNotNil(position2)
@@ -84,14 +88,14 @@ final class schwiftyesTests: XCTestCase {
         let componentManager = schwiftyes.ComponentManager<Sigs>()
         let systemManager = schwiftyes.SystemManager<Sigs>(componentManager)
 
-        componentManager.registerComponent(Position.self)
+        systemManager.registerSystem(PhysicsSystem.self)
+		componentManager.registerComponent(Position.self)
 
         let entity = entityManager.createEntity()
-        let position = Position(x: 0, y: 0)
-        componentManager.addComponent(position, entity)
+        var position = Position(x: 0, y: 0)
+        componentManager.addComponent(&position, entity)
 
-        systemManager.registerSystem(PhysicsSystem.self)
-
+		systemManager.entitySignatureChanged(entity, .sig1)
         systemManager.update()
 
         let position2 = componentManager.getComponent(entity, Position.self)

@@ -85,7 +85,7 @@ public class ComponentArray {
 
     private var size = 0
 
-    func insertData(_ component: Component, _ entity: Entity) {
+	func insertData<T: Component>(_ component: inout T, _ entity: Entity) {
         let newIndex = size
 
         componentArray[newIndex] = component
@@ -146,11 +146,11 @@ public class ComponentManager<Signatures: OptionSet> {
         nextComponentType += 1
     }
 
-    func addComponent<T: Component>(_ component: T, _ entity: Entity) {
-        guard let componentArray = getComponentArray(T.self) else {
+	func addComponent<T: Component>(_ component: inout T, _ entity: Entity) {
+		guard let componentArray = getComponentArray(T.self) else {
             return
         }
-        componentArray.insertData(component, entity)
+		componentArray.insertData(&component, entity)
     }
 
     func removeComponent<T: Component>(_: T.Type, _ entity: Entity) {
@@ -160,13 +160,7 @@ public class ComponentManager<Signatures: OptionSet> {
         componentArray.removeData(entity)
     }
 
-    // getComponent returns a mutable reference so that a component can be modified directly
-    // by the system responsible for it.
     func getComponent<T: Component>(_ entity: Entity, _: T.Type) -> T? {
-        // guard let componentArray = getComponentArray(T.self) else {
-        //    fatalError("Component not registered.")
-        // }
-        // return componentArray.getData(entity) as? T
         getComponentArray(T.self)?.getData(entity) as? T
     }
 
@@ -192,7 +186,7 @@ public class SystemManager<Signatures: OptionSet> {
         }
     }
 
-    func registerSystem(_ system: System<Signatures>.Type) {
+	func registerSystem<S: System<Signatures>>(_ system: S.Type) {
         let typeID = ObjectIdentifier(system).hashValue
         systems[typeID] = system.init(componentManager)
         signatures[typeID] = systems[typeID]?.signature
@@ -200,12 +194,12 @@ public class SystemManager<Signatures: OptionSet> {
 
     func entitySignatureChanged(_ entity: Entity, _ entitySignature: Signatures) {
         // Loop over the systems and update their entities if the entity's signature matches the system's signature.
-        for (typeID, var system) in systems {
+        for (typeID, system) in systems {
             let systemSignature = signatures[typeID]!
 
             // Compare the entity's signature with the system's signature
             // and if there are any matches, add the entity to the system.
-            if entitySignature.isDisjoint(with: systemSignature) {
+            if !entitySignature.isDisjoint(with: systemSignature) {
                 system.entities.append(entity)
             } else {
                 // If the entity's signature doesn't match the system's signature,
@@ -216,7 +210,7 @@ public class SystemManager<Signatures: OptionSet> {
     }
 
     func entityDestroyed(_ entity: Entity) {
-        for (_, var system) in systems {
+        for (_, system) in systems {
             system.entities.removeAll(where: { $0 == entity })
         }
     }
