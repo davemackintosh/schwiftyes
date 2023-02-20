@@ -112,4 +112,27 @@ final class schwiftyesTests: XCTestCase {
         XCTAssertNotNil(position3)
         XCTAssertEqual(position3!.x, 2)
     }
+
+    func testECS() throws {
+        let ecs = schwiftyes.ECS<Sigs>()
+
+        ecs.registerSystem(PhysicsSystem.self)
+        ecs.registerComponent(Position.self)
+
+        let entity = ecs.createEntity()
+        var position = Position(x: 0, y: 0)
+        ecs.addComponent(&position, entity)
+
+        ecs.update()
+
+        let position2 = ecs.getComponent(entity, Position.self)
+        XCTAssertNotNil(position2)
+        XCTAssertEqual(position2!.x, 1)
+
+        ecs.update()
+
+        let position3 = ecs.getComponent(entity, Position.self)
+        XCTAssertNotNil(position3)
+        XCTAssertEqual(position3!.x, 2)
+    }
 }

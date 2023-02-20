@@ -27,6 +27,10 @@ final class ECS<Signatures: OptionSet> {
         entityManager.destroyEntity(entity)
     }
 
+    func registerComponent<T: Component<Signatures>>(_: T.Type) {
+        componentManager.registerComponent(T.self)
+    }
+
     func addComponent(_ component: inout some Component<Signatures>, _ entity: Entity) {
         componentManager.addComponent(&component, entity)
         systemManager.entitySignatureChanged(entity, component.signature)
