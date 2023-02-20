@@ -13,43 +13,43 @@ public final class ECS<Signatures: OptionSet> {
     private var componentManager: ComponentManager<Signatures>
     private var systemManager: SystemManager<Signatures>
 
-    init() {
+    public init() {
         entityManager = EntityManager<Signatures>()
         componentManager = ComponentManager<Signatures>()
         systemManager = SystemManager<Signatures>(componentManager)
     }
 
-    func createEntity() -> Entity {
+    public func createEntity() -> Entity {
         entityManager.createEntity()
     }
 
-    func destroyEntity(_ entity: Entity) {
+    public func destroyEntity(_ entity: Entity) {
         entityManager.destroyEntity(entity)
     }
 
-    func registerComponent<T: Component<Signatures>>(_: T.Type) {
+    public func registerComponent<T: Component<Signatures>>(_: T.Type) {
         componentManager.registerComponent(T.self)
     }
 
-    func addComponent(_ component: inout some Component<Signatures>, _ entity: Entity) {
+    public func addComponent(_ component: inout some Component<Signatures>, _ entity: Entity) {
         componentManager.addComponent(&component, entity)
         systemManager.entitySignatureChanged(entity, component.signature)
     }
 
-    func removeComponent<T: Component<Signatures>>(_ component: T, _ entity: Entity) {
+    public func removeComponent<T: Component<Signatures>>(_ component: T, _ entity: Entity) {
         componentManager.removeComponent(T.self, entity)
         systemManager.entitySignatureChanged(entity, component.signature)
     }
 
-    func getComponent<T: Component<Signatures>>(_ entity: Entity, _: T.Type) -> T? {
+    public func getComponent<T: Component<Signatures>>(_ entity: Entity, _: T.Type) -> T? {
         componentManager.getComponent(entity, T.self)
     }
 
-    func registerSystem(_ system: (some System<Signatures>).Type) {
+    public func registerSystem(_ system: (some System<Signatures>).Type) {
         systemManager.registerSystem(system)
     }
 
-    func update() {
+    public func update() {
         systemManager.update()
     }
 }
