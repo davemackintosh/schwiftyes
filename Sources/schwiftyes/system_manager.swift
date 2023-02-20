@@ -1,15 +1,15 @@
 import Foundation
 
-public class System<Signatures: OptionSet> {
+open class System<Signatures: OptionSet> {
     var signature: Signatures { fatalError("Must override a system's signatures otherwise it won't run on any entities.") }
     var entities: [Entity] = []
-    var componentManager: ComponentManager<Signatures>
+    var componentManager: ComponentManager<Signatures>!
 
-    required init(_ componentManager: ComponentManager<Signatures>) {
+    public required init(_ componentManager: ComponentManager<Signatures>) {
         self.componentManager = componentManager
     }
 
-    func update(dt _: CFTimeInterval) {
+    public func update(dt _: CFTimeInterval) {
         fatalError("Must override a system's update method otherwise it's just an expensive loop in each frame.")
     }
 }
