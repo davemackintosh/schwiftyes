@@ -1,3 +1,5 @@
+import Foundation
+
 #if MAX_ENTITIES
 #else
     let MAX_ENTITIES = 1000
@@ -49,7 +51,7 @@ public final class ECS<Signatures: OptionSet> {
         systemManager.registerSystem(system)
     }
 
-    public func update() {
-        systemManager.update()
+    public func update(dt: CFTimeInterval) {
+        systemManager.update(dt: dt)
     }
 }

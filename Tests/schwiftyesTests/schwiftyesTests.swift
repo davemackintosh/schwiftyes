@@ -1,3 +1,4 @@
+import Foundation
 @testable import schwiftyes
 import XCTest
 
@@ -31,7 +32,7 @@ class PhysicsSystem: schwiftyes.System<Sigs> {
         super.init(componentManager)
     }
 
-    override func update() {
+    override func update(dt _: CFTimeInterval) {
         for entity in entities {
             let position = componentManager.getComponent(entity, Position.self)
             position?.x += 1
@@ -100,13 +101,13 @@ final class schwiftyesTests: XCTestCase {
         componentManager.addComponent(&position, entity)
 
         systemManager.entitySignatureChanged(entity, .sig1)
-        systemManager.update()
+        systemManager.update(dt: 0.0)
 
         let position2 = componentManager.getComponent(entity, Position.self)
         XCTAssertNotNil(position2)
         XCTAssertEqual(position2!.x, 1)
 
-        systemManager.update()
+        systemManager.update(dt: 0.0)
 
         let position3 = componentManager.getComponent(entity, Position.self)
         XCTAssertNotNil(position3)
@@ -123,13 +124,13 @@ final class schwiftyesTests: XCTestCase {
         var position = Position(x: 0, y: 0)
         ecs.addComponent(&position, entity)
 
-        ecs.update()
+        ecs.update(dt: 0.0)
 
         let position2 = ecs.getComponent(entity, Position.self)
         XCTAssertNotNil(position2)
         XCTAssertEqual(position2!.x, 1)
 
-        ecs.update()
+        ecs.update(dt: 0.0)
 
         let position3 = ecs.getComponent(entity, Position.self)
         XCTAssertNotNil(position3)

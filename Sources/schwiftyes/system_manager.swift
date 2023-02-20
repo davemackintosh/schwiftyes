@@ -1,3 +1,5 @@
+import Foundation
+
 public class System<Signatures: OptionSet> {
     var signature: Signatures { fatalError("Must override a system's signatures otherwise it won't run on any entities.") }
     var entities: [Entity] = []
@@ -7,7 +9,7 @@ public class System<Signatures: OptionSet> {
         self.componentManager = componentManager
     }
 
-    func update() {
+    func update(dt _: CFTimeInterval) {
         fatalError("Must override a system's update method otherwise it's just an expensive loop in each frame.")
     }
 }
@@ -21,9 +23,9 @@ public class SystemManager<Signatures: OptionSet> {
         self.componentManager = componentManager
     }
 
-    func update() {
+    func update(dt: CFTimeInterval) {
         for system in systems.values {
-            system.update()
+            system.update(dt: dt)
         }
     }
 
