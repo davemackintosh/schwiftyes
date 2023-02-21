@@ -42,7 +42,7 @@ public class ComponentManager<Signatures: OptionSet> {
         componentArray.removeData(entity)
     }
 
-    func getComponent<T: Component<Signatures>>(_ entity: Entity, _: T.Type) -> T? {
+    public func getComponent<T: Component<Signatures>>(_ entity: Entity, _: T.Type) -> T? {
         getComponentArray(T.self)?.getData(entity) as? T
     }
 
