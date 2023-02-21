@@ -9,7 +9,7 @@ open class System<Signatures: OptionSet> {
         self.componentManager = componentManager
     }
 
-    public func update(dt _: CFTimeInterval) {
+    open func update(dt _: CFTimeInterval) {
         fatalError("Must override a system's update method otherwise it's just an expensive loop in each frame.")
     }
 }
