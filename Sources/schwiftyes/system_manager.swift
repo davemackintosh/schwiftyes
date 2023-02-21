@@ -1,7 +1,7 @@
 import Foundation
 
 open class System<Signatures: OptionSet> {
-    var signature: Signatures { fatalError("Must override a system's signatures otherwise it won't run on any entities.") }
+    open var signature: Signatures { fatalError("Must override a system's signatures otherwise it won't run on any entities.") }
     public var entities: [Entity] = []
     public var componentManager: ComponentManager<Signatures>!
 
