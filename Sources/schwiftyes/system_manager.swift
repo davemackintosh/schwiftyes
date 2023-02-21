@@ -3,7 +3,7 @@ import Foundation
 open class System<Signatures: OptionSet> {
     var signature: Signatures { fatalError("Must override a system's signatures otherwise it won't run on any entities.") }
     var entities: [Entity] = []
-    var componentManager: ComponentManager<Signatures>!
+    public var componentManager: ComponentManager<Signatures>!
 
     public required init(_ componentManager: ComponentManager<Signatures>) {
         self.componentManager = componentManager
