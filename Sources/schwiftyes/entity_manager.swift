@@ -1,6 +1,9 @@
-public typealias Entity = Int
+import Foundation
 
-public class EntityManager<Signatures: OptionSet> {
+public typealias Entity = Int
+public typealias Signature = IndexSet
+
+final public class EntityManager {
     private var entities: ContiguousArray<Entity> = .init(unsafeUninitializedCapacity: MAX_ENTITIES) { buffer, count in
         for i in 0 ..< MAX_ENTITIES {
             buffer[i] = i
@@ -8,7 +11,7 @@ public class EntityManager<Signatures: OptionSet> {
         count = MAX_ENTITIES
     }
 
-    private var signatures: ContiguousArray<Signatures> = .init(repeating: Signatures(), count: MAX_ENTITIES)
+	private var signatures: ContiguousArray<Signature> = .init(repeating: .init(), count: MAX_ENTITIES)
 
     private var livingEntities = 0
 
@@ -20,7 +23,7 @@ public class EntityManager<Signatures: OptionSet> {
 
     func destroyEntity(_ entity: Entity) {
         // Reset the signature of the destroyed entity.
-        signatures[entity] = Signatures()
+		signatures[entity] = .init()
 
         // Swap the destroyed entity with the last living entity.
         entities.remove(at: entity)
@@ -30,11 +33,11 @@ public class EntityManager<Signatures: OptionSet> {
         livingEntities -= 1
     }
 
-    func setSignature(_ entity: Entity, _ signature: Signatures) {
+    func setSignature(_ entity: Entity, _ signature: Signature) {
         signatures[entity] = signature
     }
 
-    func getSignature(_ entity: Entity) -> Signatures {
+    func getSignature(_ entity: Entity) -> Signature {
         signatures[entity]
     }
 }

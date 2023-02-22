@@ -1,4 +1,3 @@
-import Foundation
 @testable import schwiftyes
 import XCTest
 
@@ -9,13 +8,9 @@ struct Sigs: OptionSet {
     static let sig2 = Sigs(rawValue: 1 << 1)
 }
 
-class Position: Component<Sigs> {
+class Position: Component {
     var x: Float
     var y: Float
-
-    override var signature: Sigs {
-        [.sig1, .sig2]
-    }
 
     init(x: Float, y: Float) {
         self.x = x
@@ -23,13 +18,13 @@ class Position: Component<Sigs> {
     }
 }
 
-class PhysicsSystem: schwiftyes.System<Sigs> {
-    override var signature: Sigs {
-        [.sig1, .sig2]
-    }
+class PhysicsSystem: schwiftyes.System {
+	override var signature: [Component.Type] {
+		[Position.self]
+	}
 
-    required init(_ componentManager: ComponentManager<Sigs>) {
-        super.init(componentManager)
+    required init(_ componentManager: inout ComponentManager) {
+        super.init(&componentManager)
     }
 
     override func update(dt _: CFTimeInterval) {
@@ -42,7 +37,7 @@ class PhysicsSystem: schwiftyes.System<Sigs> {
 
 final class schwiftyesTests: XCTestCase {
     func testEntityManager() throws {
-        let entityManager = schwiftyes.EntityManager<Sigs>()
+        let entityManager = schwiftyes.EntityManager()
         let entity = entityManager.createEntity()
         let entity2 = entityManager.createEntity()
         let entity3 = entityManager.createEntity()
@@ -54,8 +49,8 @@ final class schwiftyesTests: XCTestCase {
     }
 
     func testComponentArray() throws {
-        let entityManager = schwiftyes.EntityManager<Sigs>()
-        let componentArray = schwiftyes.ComponentArray<Sigs>()
+        let entityManager = schwiftyes.EntityManager()
+        let componentArray = schwiftyes.ComponentArray()
 
         let entity = entityManager.createEntity()
         var position = Position(x: 0, y: 0)
@@ -70,12 +65,15 @@ final class schwiftyesTests: XCTestCase {
     }
 
     func testComponentManager() throws {
-        let entityManager = schwiftyes.EntityManager<Sigs>()
-        let componentManager = schwiftyes.ComponentManager<Sigs>()
+        let entityManager = schwiftyes.EntityManager()
+        let componentManager = schwiftyes.ComponentManager()
 
         componentManager.registerComponent(Position.self)
 
         let entity = entityManager.createEntity()
+		var sig = entityManager.getSignature(entity)
+		sig.insert(componentManager.getComponentType(component: Position.self))
+		entityManager.setSignature(entity, sig)
         var position = Position(x: 0, y: 0)
         componentManager.addComponent(&position, entity)
 
@@ -89,18 +87,22 @@ final class schwiftyesTests: XCTestCase {
     }
 
     func testSystemManager() throws {
-        let entityManager = schwiftyes.EntityManager<Sigs>()
-        let componentManager = schwiftyes.ComponentManager<Sigs>()
-        let systemManager = schwiftyes.SystemManager<Sigs>(componentManager)
+        let entityManager = schwiftyes.EntityManager()
+        let componentManager = schwiftyes.ComponentManager()
+        let systemManager = schwiftyes.SystemManager(componentManager)
 
         systemManager.registerSystem(PhysicsSystem.self)
         componentManager.registerComponent(Position.self)
 
         let entity = entityManager.createEntity()
+		var sig = entityManager.getSignature(entity)
+		print("Type \(componentManager.getComponentType(component: Position.self))")
+		sig.insert(componentManager.getComponentType(component: Position.self))
+		entityManager.setSignature(entity, sig)
         var position = Position(x: 0, y: 0)
         componentManager.addComponent(&position, entity)
 
-        systemManager.entitySignatureChanged(entity, .sig1)
+        systemManager.entitySignatureChanged(entity, sig)
         systemManager.update(dt: 0.0)
 
         let position2 = componentManager.getComponent(entity, Position.self)
@@ -115,7 +117,7 @@ final class schwiftyesTests: XCTestCase {
     }
 
     func testECS() throws {
-        let ecs = schwiftyes.ECS<Sigs>()
+        let ecs = schwiftyes.ECS()
 
         ecs.registerSystem(PhysicsSystem.self)
         ecs.registerComponent(Position.self)
@@ -123,7 +125,6 @@ final class schwiftyesTests: XCTestCase {
         let entity = ecs.createEntity()
         var position = Position(x: 0, y: 0)
         ecs.addComponent(&position, entity)
-
         ecs.update(dt: 0.0)
 
         let position2 = ecs.getComponent(entity, Position.self)

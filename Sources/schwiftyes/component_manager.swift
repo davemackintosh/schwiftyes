@@ -1,16 +1,12 @@
-open class Component<S: OptionSet> {
-    var signature: S {
-        fatalError("Component signature must be set in subclass, otherwise no system will iterate it and it won't be considered valid.")
-    }
-
+open class Component {
     public init() {}
 }
 
-public class ComponentManager<Signatures: OptionSet> {
-    private var componentTypes: [Int: Component<Signatures>.Type] = [:]
-    private var componentArrays: [Int: ComponentArray<Signatures>] = [:]
+final public class ComponentManager {
+    private var componentTypes: [Int: Component.Type] = [:]
+    private var componentArrays: [Int: ComponentArray] = [:]
     private var nextComponentType = 0
-    private func getComponentArray<T: Component<Signatures>>(_: T.Type) -> ComponentArray<Signatures>? {
+    private func getComponentArray<T: Component>(_: T.Type) -> ComponentArray? {
         let typeID = componentTypes.first(where: {
             $0.value is T.Type
         })?.key
@@ -22,29 +18,33 @@ public class ComponentManager<Signatures: OptionSet> {
         return componentArrays[id]
     }
 
-    func registerComponent(_ component: (some Component<Signatures>).Type) {
+    func registerComponent(_ component: (some Component).Type) {
         componentTypes[nextComponentType] = component
         componentArrays[nextComponentType] = ComponentArray()
         nextComponentType += 1
     }
 
-    func addComponent<T: Component<Signatures>>(_ component: inout T, _ entity: Entity) {
+    func addComponent<T: Component>(_ component: inout T, _ entity: Entity) {
         guard let componentArray = getComponentArray(T.self) else {
             return
         }
         componentArray.insertData(&component, entity)
     }
 
-    func removeComponent<T: Component<Signatures>>(_: T.Type, _ entity: Entity) {
+    func removeComponent<T: Component>(_: T.Type, _ entity: Entity) {
         guard let componentArray = getComponentArray(T.self) else {
             return
         }
         componentArray.removeData(entity)
     }
 
-    public func getComponent<T: Component<Signatures>>(_ entity: Entity, _: T.Type) -> T? {
+    public func getComponent<T: Component>(_ entity: Entity, _: T.Type) -> T? {
         getComponentArray(T.self)?.getData(entity) as? T
     }
+
+	public func getComponentType<T:Component>(component: T.Type) -> Int {
+		Int(bitPattern: ObjectIdentifier(component))
+	}
 
     func entityDestroyed(_ entity: Entity) {
         for componentArray in componentArrays.values {

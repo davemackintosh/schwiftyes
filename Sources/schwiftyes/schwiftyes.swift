@@ -10,15 +10,15 @@ import Foundation
     let MAX_COMPONENTS = 1000
 #endif
 
-public final class ECS<Signatures: OptionSet> {
-    private var entityManager: EntityManager<Signatures>
-    private var componentManager: ComponentManager<Signatures>
-    private var systemManager: SystemManager<Signatures>
+public final class ECS {
+    private var entityManager: EntityManager
+    private var componentManager: ComponentManager
+    private var systemManager: SystemManager
 
     public init() {
-        entityManager = EntityManager<Signatures>()
-        componentManager = ComponentManager<Signatures>()
-        systemManager = SystemManager<Signatures>(componentManager)
+        entityManager = EntityManager()
+        componentManager = ComponentManager()
+        systemManager = SystemManager(componentManager)
     }
 
     public func createEntity() -> Entity {
@@ -29,25 +29,31 @@ public final class ECS<Signatures: OptionSet> {
         entityManager.destroyEntity(entity)
     }
 
-    public func registerComponent<T: Component<Signatures>>(_: T.Type) {
+    public func registerComponent<T: Component>(_: T.Type) {
         componentManager.registerComponent(T.self)
     }
 
-    public func addComponent(_ component: inout some Component<Signatures>, _ entity: Entity) {
+	public func addComponent<T: Component>(_ component: inout T, _ entity: Entity) {
+		var sig = entityManager.getSignature(entity)
+		sig.insert(componentManager.getComponentType(component: type(of:component)))
+		entityManager.setSignature(entity, sig)
         componentManager.addComponent(&component, entity)
-        systemManager.entitySignatureChanged(entity, component.signature)
+		systemManager.entitySignatureChanged(entity, sig)
     }
 
-    public func removeComponent<T: Component<Signatures>>(_ component: T, _ entity: Entity) {
+    public func removeComponent<T: Component>(_ component: T, _ entity: Entity) {
+		var sig = entityManager.getSignature(entity)
+		sig.remove(componentManager.getComponentType(component: type(of:component)))
+		entityManager.setSignature(entity, sig)
         componentManager.removeComponent(T.self, entity)
-        systemManager.entitySignatureChanged(entity, component.signature)
+		systemManager.entitySignatureChanged(entity, sig)
     }
 
-    public func getComponent<T: Component<Signatures>>(_ entity: Entity, _: T.Type) -> T? {
+    public func getComponent<T: Component>(_ entity: Entity, _: T.Type) -> T? {
         componentManager.getComponent(entity, T.self)
     }
 
-    public func registerSystem(_ system: (some System<Signatures>).Type) {
+    public func registerSystem(_ system: (some System).Type) {
         systemManager.registerSystem(system)
     }
 

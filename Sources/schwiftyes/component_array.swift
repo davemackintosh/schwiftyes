@@ -1,7 +1,7 @@
-private class NoComponent<Signatures: OptionSet>: Component<Signatures> {}
+private class NoComponent: Component {}
 
-public class ComponentArray<Signatures: OptionSet> {
-    private var componentArray: ContiguousArray<Component<Signatures>> = .init(repeating: NoComponent(), count: MAX_ENTITIES)
+public class ComponentArray {
+    private var componentArray: ContiguousArray<Component> = .init(repeating: NoComponent(), count: MAX_ENTITIES)
 
     private var entityToIndexMap: ContiguousArray<Entity> = .init(unsafeUninitializedCapacity: MAX_ENTITIES) { buffer, count in
         for i in 0 ..< MAX_ENTITIES {
@@ -19,7 +19,7 @@ public class ComponentArray<Signatures: OptionSet> {
 
     private var size = 0
 
-    func insertData(_ component: inout some Component<Signatures>, _ entity: Entity) {
+    func insertData(_ component: inout some Component, _ entity: Entity) {
         let newIndex = size
 
         componentArray[newIndex] = component
@@ -40,14 +40,14 @@ public class ComponentArray<Signatures: OptionSet> {
         indexToEntityMap[indexOfRemovedEntity] = entityOfLastElement
 
         // Remove the last element
-        componentArray[indexOfRemovedEntity] = NoComponent<Signatures>()
+        componentArray[indexOfRemovedEntity] = NoComponent()
         entityToIndexMap[entity] = 0
         indexToEntityMap[indexOfLastElement] = 0
     }
 
     // getData returns a reference so that a component can be modified directly
     // by the system responsible for it.
-    func getData(_ entity: Entity) -> Component<Signatures> {
+    func getData(_ entity: Entity) -> Component {
         // let index = entityToIndexMap[entity]
         // return componentArray[index]
         componentArray[entityToIndexMap[entity]]
