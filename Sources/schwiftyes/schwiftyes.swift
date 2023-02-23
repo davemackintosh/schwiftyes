@@ -60,4 +60,8 @@ public final class ECS {
     public func update(dt: CFTimeInterval) {
         systemManager.update(dt: dt)
     }
+
+    public func getSystem<T: System>(_ system: T.Type) -> T? {
+		systemManager.getSystem(system)
+	}
 }
