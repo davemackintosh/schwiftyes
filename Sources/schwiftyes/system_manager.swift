@@ -1,28 +1,36 @@
 import Foundation
 
 open class System {
-    public var entities: [Entity] = []
-    public var componentManager: ComponentManager!
-    open var signature: Signature {
-        fatalError("Must override a system's signature otherwise it's just an expensive loop in each frame.")
-    }
+    // MARK: Lifecycle
 
     public required init(_ componentManager: inout ComponentManager) {
         self.componentManager = componentManager
     }
 
+    // MARK: Open
+
+    open var signature: Signature {
+        fatalError("Must override a system's signature otherwise it's just an expensive loop in each frame.")
+    }
+
     open func update(dt _: CFTimeInterval) {
         fatalError("Must override a system's update method otherwise it's just an expensive loop in each frame.")
     }
+
+    // MARK: Public
+
+    public var entities: [Entity] = []
+    public var componentManager: ComponentManager!
 }
 
 public final class SystemManager {
-    private var systems: [Int: System] = [:]
-    private var componentManager: ComponentManager
+    // MARK: Lifecycle
 
     init(_ componentManager: ComponentManager) {
         self.componentManager = componentManager
     }
+
+    // MARK: Internal
 
     func update(dt: CFTimeInterval) {
         for system in systems.values {
@@ -40,7 +48,7 @@ public final class SystemManager {
         for (_, system) in systems {
             // Compare the entity's signature with the system's signature
             // and if there are any matches, add the entity to the system.
-			if entitySignature.isSubset(of: system.signature) {
+            if entitySignature.isSubset(of: system.signature) {
                 system.entities.append(entity)
             } else {
                 // If the entity's signature doesn't match the system's signature,
@@ -55,4 +63,14 @@ public final class SystemManager {
             system.entities.removeAll(where: { $0 == entity })
         }
     }
+
+    func getSystem<T: System>(_ system: T.Type) -> T? {
+        let typeID = ObjectIdentifier(system).hashValue
+        return systems[typeID] as? T
+    }
+
+    // MARK: Private
+
+    private var systems: [Int: System] = [:]
+    private var componentManager: ComponentManager
 }
