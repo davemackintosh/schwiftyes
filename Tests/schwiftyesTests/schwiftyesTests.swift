@@ -1,13 +1,6 @@
 @testable import schwiftyes
 import XCTest
 
-struct Sigs: OptionSet {
-    let rawValue: Int
-
-    static let sig1 = Sigs(rawValue: 1 << 0)
-    static let sig2 = Sigs(rawValue: 1 << 1)
-}
-
 class Position: Component {
     var x: Float
     var y: Float
@@ -19,9 +12,9 @@ class Position: Component {
 }
 
 class PhysicsSystem: schwiftyes.System {
-	override var signature: [Component.Type] {
-		[Position.self]
-	}
+    override var signature: schwiftyes.Signature {
+        Signature.from([Position.self])
+    }
 
     required init(_ componentManager: inout ComponentManager) {
         super.init(&componentManager)
@@ -71,9 +64,9 @@ final class schwiftyesTests: XCTestCase {
         componentManager.registerComponent(Position.self)
 
         let entity = entityManager.createEntity()
-		var sig = entityManager.getSignature(entity)
-		sig.insert(componentManager.getComponentType(component: Position.self))
-		entityManager.setSignature(entity, sig)
+        var sig = entityManager.getSignature(entity)
+        sig.insert(componentManager.getComponentType(component: Position.self))
+        entityManager.setSignature(entity, sig)
         var position = Position(x: 0, y: 0)
         componentManager.addComponent(&position, entity)
 
@@ -95,10 +88,10 @@ final class schwiftyesTests: XCTestCase {
         componentManager.registerComponent(Position.self)
 
         let entity = entityManager.createEntity()
-		var sig = entityManager.getSignature(entity)
-		print("Type \(componentManager.getComponentType(component: Position.self))")
-		sig.insert(componentManager.getComponentType(component: Position.self))
-		entityManager.setSignature(entity, sig)
+        var sig = entityManager.getSignature(entity)
+        print("Type \(componentManager.getComponentType(component: Position.self))")
+        sig.insert(componentManager.getComponentType(component: Position.self))
+        entityManager.setSignature(entity, sig)
         var position = Position(x: 0, y: 0)
         componentManager.addComponent(&position, entity)
 

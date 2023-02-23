@@ -3,7 +3,7 @@ import Foundation
 open class System {
     public var entities: [Entity] = []
     public var componentManager: ComponentManager!
-    open var signature: [Component.Type] {
+    open var signature: Signature {
         fatalError("Must override a system's signature otherwise it's just an expensive loop in each frame.")
     }
 
@@ -38,14 +38,9 @@ public final class SystemManager {
     func entitySignatureChanged(_ entity: Entity, _ entitySignature: IndexSet) {
         // Loop over the systems and update their entities if the entity's signature matches the system's signature.
         for (_, system) in systems {
-			var systemSignature = schwiftyes.Signature()
-			for type in system.signature {
-				systemSignature.insert(self.componentManager.getComponentType(component: type))
-			}
-
             // Compare the entity's signature with the system's signature
             // and if there are any matches, add the entity to the system.
-            if entitySignature.isSubset(of: systemSignature) {
+			if entitySignature.isSubset(of: system.signature) {
                 system.entities.append(entity)
             } else {
                 // If the entity's signature doesn't match the system's signature,
