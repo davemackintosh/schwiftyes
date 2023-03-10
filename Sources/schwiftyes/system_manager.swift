@@ -1,6 +1,6 @@
 import Foundation
 
-open class System {
+open class System: NSObject {
     // MARK: Lifecycle
 
     public required init(_ componentManager: inout ComponentManager) {
@@ -33,19 +33,18 @@ public final class SystemManager {
     // MARK: Internal
 
     func update(dt: CFTimeInterval) {
-        for system in systems.values {
+        for system in systems {
             system.update(dt: dt)
         }
     }
 
     func registerSystem(_ system: (some System).Type) {
-        let typeID = ObjectIdentifier(system).hashValue
-        systems[typeID] = system.init(&componentManager)
+		systems.append(system.init(&componentManager))
     }
 
     func entitySignatureChanged(_ entity: Entity, _ entitySignature: IndexSet) {
         // Loop over the systems and update their entities if the entity's signature matches the system's signature.
-        for (_, system) in systems {
+        for system in systems {
             // Compare the entity's signature with the system's signature
             // and if there are any matches, add the entity to the system.
             if entitySignature.isSubset(of: system.signature) {
@@ -59,18 +58,13 @@ public final class SystemManager {
     }
 
     func entityDestroyed(_ entity: Entity) {
-        for (_, system) in systems {
+        for system in systems {
             system.entities.removeAll(where: { $0 == entity })
         }
     }
 
-    func getSystem<T: System>(_ system: T.Type) -> T? {
-        let typeID = ObjectIdentifier(system).hashValue
-        return systems[typeID] as? T
-    }
-
     // MARK: Private
 
-    private var systems: [Int: System] = [:]
+    private var systems: ContiguousArray<System> = []
     private var componentManager: ComponentManager
 }

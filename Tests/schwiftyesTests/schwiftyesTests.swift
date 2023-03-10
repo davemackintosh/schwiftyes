@@ -107,9 +107,6 @@ final class schwiftyesTests: XCTestCase {
         let position3 = componentManager.getComponent(entity, Position.self)
         XCTAssertNotNil(position3)
         XCTAssertEqual(position3!.x, 2)
-
-        let system = systemManager.getSystem(PhysicsSystem.self)
-        XCTAssertNotNil(system)
     }
 
     func testECS() throws {
