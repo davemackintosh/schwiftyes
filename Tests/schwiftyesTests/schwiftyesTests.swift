@@ -133,4 +133,25 @@ final class schwiftyesTests: XCTestCase {
         XCTAssertNotNil(position3)
         XCTAssertEqual(position3!.x, 2)
     }
+
+//	func testMemoryLeaks() throws {
+//        let ecs = schwiftyes.ECS()
+//
+//        ecs.registerSystem(PhysicsSystem.self)
+//        ecs.registerComponent(Position.self)
+//
+//        let entity = ecs.createEntity()
+//        var position = Position(x: 0, y: 0)
+//        ecs.addComponent(&position, entity)
+//
+//		var runLoop = true
+//
+//		DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) {
+//			runLoop = false
+//		}
+//
+//		while(runLoop) {
+//			ecs.update(dt: 0.33)
+//		}
+//	}
 }

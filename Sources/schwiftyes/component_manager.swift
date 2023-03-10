@@ -1,6 +1,4 @@
-open class Component {
-    public init() {}
-}
+open class Component {}
 
 final public class ComponentManager {
     private var componentTypes: [Int: Component.Type] = [:]
